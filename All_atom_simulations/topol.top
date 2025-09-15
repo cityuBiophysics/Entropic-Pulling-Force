@@ -1,0 +1,50 @@
+;
+;	File 'topol.top' was generated
+;	By user: tian (1001)
+;	On host: cityu5
+;	At date: Wed Dec 16 16:20:19 2020
+;
+;	This is a standalone topology file
+;
+;	Created by:
+;	                    :-) GROMACS - gmx pdb2gmx, 2018.4 (-:
+;	
+;	Executable:   /home/tian/gmx2018.4/bin/gmx
+;	Data prefix:  /home/tian/gmx2018.4
+;	Working dir:  /home/tian/Flexibility/DNA
+;	Command line:
+;	  gmx pdb2gmx -f DNA.pdb -o DNA.gro -water tip3p -ignh
+;	Force field was read from the standard GROMACS share directory.
+;
+
+; Include forcefield parameters
+#include "amber14sb_OL15_cobalt.ff/forcefield.itp"
+
+; Include chain topologies
+#include "topol_DNA_chain_A.itp"
+#include "topol_DNA_chain_B.itp"
+
+; cohex
+#include "amber14sb_OL15_cobalt.ff/cohex.itp"
+
+; Include water topology
+#include "amber14sb_OL15_cobalt.ff/tip3p.itp"
+
+#ifdef POSRES_WATER
+; Position restraint for each water oxygen
+[ position_restraints ]
+;  i funct       fcx        fcy        fcz
+   1    1       1000       1000       1000
+#endif
+
+; Include topology for ions
+#include "amber14sb_OL15_cobalt.ff/ions.itp"
+
+[ system ]
+; Name
+Protein in water
+
+[ molecules ]
+; Compound        #mols
+DNA_chain_A         1
+DNA_chain_B         1
