@@ -1,0 +1,41 @@
+ variable         fname index Plate_21.txt 
+ variable         simname index Plate_21.txt
+ units		    lj
+ boundary	        p p p 
+ atom_style	    angle
+ log 		        log.${simname}.txt
+ read_data	    ${fname}
+ pair_style   	lj/cut 4.4896  
+ pair_coeff   	* * 0  3.04  3.43
+ pair_coeff       * 3 1  3.04  3.43
+ pair_coeff       3 3 0  3.04  3.43
+ bond_style       harmonic
+ bond_coeff       1 5 1.8 
+ bond_coeff       2 10 5.00 
+ angle_style      harmonic
+ angle_coeff      1 2 90.0
+ angle_coeff      2 4 180.0
+ neighbor         1.0 bin
+ comm_modify      cutoff 10
+ group            boundary type 2
+ group            flex     type 1 
+ group            center id 221
+ group            binding type 3
+ group            flexAbinding union flex binding
+ neigh_modify	  every 1 delay 0 check yes
+ min_style                cg
+ min_modify               dmax 0.05
+ minimize         1.0e-10 1.0e-16 20000 200000
+ reset_timestep	0
+ velocity             flexAbinding create 1.0 1231
+ fix                  1 flexAbinding nve/limit 0.1
+ fix		    2 flexAbinding langevin 1 1 200 904297
+ fix                  static boundary setforce 0 0 0
+ thermo               1000
+ timestep	            0.001
+ run                 500000
+ dump                1 binding custom 10 diDNA_log_10.lammpstrj id type  x y z 
+ dump_modify 	    1 sort id 
+ dump                2 flex custom 20 flex_10.lammpstrj id z 
+ dump_modify          2 sort id 
+ run                 10000000

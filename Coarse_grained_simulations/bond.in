@@ -1,0 +1,47 @@
+# LAMMPS Simulation of Two Harmonically-Bonded Particles with Langevin Thermostat
+
+# Initialize simulation
+units       lj
+atom_style  molecular  # Required for bonds
+dimension   3
+boundary    p p p
+
+# Create simulation box and particles
+region      box block -5 5 -5 5 -5 5
+create_box  1 box bond/types 1 extra/bond/per/atom 1
+create_atoms 1 single 0 0 0
+create_atoms 1 single 1.0 0 0
+mass        1 1.0
+
+# Define bond types and create bond
+bond_style  harmonic
+bond_coeff  1 5.0 1.6  # k=50, r0=1.5
+create_bonds single/bond 1 1 2  # Create bond of type 1 between atoms 1 and 2
+
+# Turn off non-bonded interactions
+pair_style  lj/cut 0.1
+pair_coeff  1 1 0.0 1.0 0.1  # epsilon=0 turns off LJ
+special_bonds lj 0 0 0
+
+# Neighbor list settings
+neighbor    0.3 bin
+neigh_modify every 1 delay 0 check yes
+
+# Compute distance between particles
+variable    dx equal x[2]-x[1]
+variable    dy equal y[2]-y[1]
+variable    dz equal z[2]-z[1]
+variable    dist equal sqrt(v_dx^2+v_dy^2+v_dz^2)
+
+group       one id 1
+# Define output with distance calculation
+thermo      100
+thermo_style custom step temp  v_dist
+
+# Initialize velocities and run
+velocity    all create 1.0 4928459 dist gaussian
+fix         mynve all nve
+fix         mylgv all langevin 1.0 1.0 100 1530917 zero yes
+#fix        static one setforce  0 0 0 
+timestep    0.005
+run         100000000

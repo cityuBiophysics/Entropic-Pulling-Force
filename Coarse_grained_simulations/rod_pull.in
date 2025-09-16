@@ -1,0 +1,40 @@
+ variable         fname index Ela_cylin_68.txt 
+ units		    lj
+ boundary	        p p p 
+ atom_style	    angle
+ read_data	    ${fname}
+ pair_style   	lj/cut 4.4896  
+ pair_coeff   	1 1 0  3.80  4.29
+ bond_style  hybrid fene harmonic
+ bond_coeff       1 harmonic 0.2 4.913 
+ bond_coeff       2 fene 7 5 0.5 5  
+ angle_style      harmonic
+ angle_coeff      1 6 135.0
+ angle_coeff      2 10 180.0
+ angle_coeff      3 8 90.0
+ neighbor         1.0 bin
+ comm_modify      cutoff 10
+ group            DNA type 1
+ group            anchor id 9 29
+ neigh_modify	  every 1 delay 0 check yes
+ min_style                cg
+ min_modify               dmax 0.05
+ minimize         1.0e-10 1.0e-16 20000 200000
+ reset_timestep	0
+ velocity             all create 1.0 1231
+ fix                  1 all nve/limit 0.2
+ fix		    2 all langevin 1 1 20  904297
+ fix                  3 DNA recenter 0 0 12
+ compute center all com 
+ variable dis_square atom (x-c_center[1])^2+(y-c_center[2])^2 
+ variable dis atom sqrt(v_dis_square)
+ variable fx atom .20*(x-c_center[1])/v_dis
+ variable fy atom .20*(y-c_center[2])/v_dis
+ fix 4 anchor addforce v_fx v_fy 0
+ variable             loc equal sqrt(x[9]^2+y[9]^2)
+ thermo               100
+ thermo_style         custom step temp v_loc
+ timestep	            0.005
+ dump                1 all custom 100 diDNA_log_20.lammpstrj id type  x y z 
+ dump_modify 	    1 sort id 
+ run                 10000000

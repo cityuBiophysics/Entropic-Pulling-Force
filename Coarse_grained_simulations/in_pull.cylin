@@ -1,0 +1,35 @@
+ variable         fname index Plate_pull.txt 
+ variable         simname index Plate_pull.txt
+ units		    lj
+ boundary	        p p p 
+ atom_style	    angle
+ log 		        log.${simname}.txt
+ read_data	    ${fname}
+ pair_style   	lj/cut 4.4896  
+ pair_coeff   	1 1 0  5.32  6.01
+ bond_style       harmonic
+ bond_coeff       1 2 1.8 
+ angle_style      harmonic
+ angle_coeff      1 6 90.0
+ angle_coeff      2 6 180.0
+ neighbor         1.0 bin
+ comm_modify      cutoff 10
+ group            boundary id 1 2 3 4 5 6 10 11 15 16 20 21 22 23 24 25
+ group            flex     id 7 8 9 12 13 14 17 18 19
+ group            center id 13
+ neigh_modify	  every 1 delay 0 check yes
+ min_style                cg
+ min_modify               dmax 0.05
+ minimize         1.0e-10 1.0e-16 20000 200000
+ reset_timestep	0
+ velocity             flex create 1.0 1231
+ fix                  1 flex nve/limit 0.1
+ fix		    2 flex langevin 1 1 20 904297
+ fix                  pull center addforce 0 0 .10 
+ fix                  static boundary setforce 0 0 0
+ thermo               1000
+ timestep	            0.0005
+ run                 500000
+ dump                1 all custom 100 flex_10.lammpstrj id z 
+ dump_modify 	    1 sort id 
+ run                 2000000
